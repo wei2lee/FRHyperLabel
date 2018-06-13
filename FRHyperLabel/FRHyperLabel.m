@@ -127,6 +127,11 @@ static UIColor *FRHyperLabelLinkColorHighlight;
 			[UIView transitionWithView:self duration:highLightAnimationTime options:UIViewAnimationOptionTransitionCrossDissolve animations:^{
 				self.attributedText = attributedString;
 			} completion:nil];
+            
+            if (self.isTouchImmediateResponse == true) {
+                void(^handler)(FRHyperLabel *label, NSRange selectedRange) = self.handlerDictionary[rangeValue];
+                handler(self, [rangeValue rangeValue]);
+            }
 			return;
 		}
 	}
@@ -145,14 +150,16 @@ static UIColor *FRHyperLabelLinkColorHighlight;
 		self.attributedText = self.backupAttributedText;
 	} completion:nil];
 	
-	for (UITouch *touch in touches) {
-		NSValue *rangeValue = [self attributedTextRangeForPoint:[touch locationInView:self]];
-		if (rangeValue) {
-			void(^handler)(FRHyperLabel *label, NSRange selectedRange) = self.handlerDictionary[rangeValue];
-			handler(self, [rangeValue rangeValue]);
-			return;
-		}
-	}
+    if (self.isTouchImmediateResponse == false) {
+        for (UITouch *touch in touches) {
+            NSValue *rangeValue = [self attributedTextRangeForPoint:[touch locationInView:self]];
+            if (rangeValue) {
+                void(^handler)(FRHyperLabel *label, NSRange selectedRange) = self.handlerDictionary[rangeValue];
+                handler(self, [rangeValue rangeValue]);
+                return;
+            }
+        }
+    }
 	[super touchesEnded:touches withEvent:event];
 }
 
@@ -203,17 +210,22 @@ static UIColor *FRHyperLabelLinkColorHighlight;
 }
 
 - (NSValue *)attributedTextRangeForPoint:(CGPoint)point {
-
-	NSInteger indexOfCharacter = [self characterIndexForPoint:point];
-	
-	for (NSValue *rangeValue in self.handlerDictionary) {
-		NSRange range = [rangeValue rangeValue];
-		if (NSLocationInRange(indexOfCharacter, range)) {
-			return rangeValue;
-		}
-	}
-
-	return nil;
+    
+    NSInteger indexOfCharacter = [self characterIndexForPoint:point];
+    
+    for (NSValue *rangeValue in self.handlerDictionary) {
+        NSRange range = [rangeValue rangeValue];
+        
+        NSInteger expandedValue = self.numberOfExtraPaddingForTouch;
+        NSInteger startLocation = (range.location >= expandedValue) ? range.location - expandedValue : 0;
+        NSRange expandRange = NSMakeRange(startLocation, range.length + (expandedValue * 2));
+        
+        if (NSLocationInRange(indexOfCharacter, expandRange)) {
+            return rangeValue;
+        }
+    }
+    
+    return nil;
 }
 
 - (CGRect)attributedTextBoundingBox {

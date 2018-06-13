@@ -12,6 +12,8 @@
 
 @property (nonatomic) NSDictionary *linkAttributeDefault;
 @property (nonatomic) NSDictionary *linkAttributeHighlight;
+@property (nonatomic) BOOL isTouchImmediateResponse;
+@property (nonatomic) NSInteger numberOfExtraPaddingForTouch;
 
 - (void)setLinkForRange:(NSRange)range withAttributes:(NSDictionary *)attributes andLinkHandler:(void (^)(FRHyperLabel *label, NSRange selectedRange))handler;
 - (void)setLinkForRange:(NSRange)range withLinkHandler:(void(^)(FRHyperLabel *label, NSRange selectedRange))handler;

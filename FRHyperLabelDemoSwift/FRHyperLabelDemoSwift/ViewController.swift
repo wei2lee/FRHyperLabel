@@ -17,6 +17,8 @@ class ViewController: UIViewController {
 		// Do any additional setup after loading the view, typically from a nib.
 		
 		label.numberOfLines = 0;
+        label.numberOfExtraPaddingForTouch = 2;
+        label.isTouchImmediateResponse = true;
 		
 		//Step 1: Define a normal attributed string for non-link texts
 		let string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque quis blandit eros, sit amet vehicula justo. Nam at urna neque. Maecenas ac sem eu sem porta dictum nec vel tellus."
